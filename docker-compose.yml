@@ -12,7 +12,7 @@ services:
     environment:
       QDRANT__STORAGE__PATH: "/qdrant/storage"
 
-  rag_chatbot:
+  rag-backend:
     build: .
     container_name: rag_chatbot
     restart: always
@@ -40,7 +40,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - rag_chatbot
+      - rag-backend
 
 volumes:
   qdrant_storage:

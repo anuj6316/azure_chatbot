@@ -39,20 +39,12 @@ fi
 ACR_LOGIN_SERVER=$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)
 echo "ACR Login Server: $ACR_LOGIN_SERVER"
 
-# Build and push images if they don't exist
-if ! az acr repository show --name "$ACR_NAME" --image "rag_chatbot:latest" &>/dev/null; then
-    echo "Building backend image in ACR..."
-    az acr build --registry "$ACR_NAME" --image rag_chatbot:latest -f dockerfile .
-else
-    echo "Backend image already exists in ACR."
-fi
+# Build and push images
+echo "Building backend image in ACR..."
+az acr build --registry "$ACR_NAME" --image rag_chatbot:latest -f dockerfile .
 
-if ! az acr repository show --name "$ACR_NAME" --image "frontend:latest" &>/dev/null; then
-    echo "Building frontend image in ACR..."
-    az acr build --registry "$ACR_NAME" --image frontend:latest -f frontend/ai-chatbot-ui/Dockerfile frontend/ai-chatbot-ui
-else
-    echo "Frontend image already exists in ACR."
-fi
+echo "Building frontend image in ACR..."
+az acr build --registry "$ACR_NAME" --image frontend:latest -f frontend/ai-chatbot-ui/Dockerfile frontend/ai-chatbot-ui
 
 echo "Images are ready in $ACR_LOGIN_SERVER"
 
@@ -110,7 +102,7 @@ else
     echo "Container Apps environment '$CONTAINER_APP_ENV' already exists."
 fi
 
-# 5. Link storage and create the Qdrant Container App
+# 5. Link storage and create/update the Qdrant Container App
 echo "Linking file share to Container Apps Environment..."
 az containerapp env storage set \
   --name "$CONTAINER_APP_ENV" \
@@ -134,43 +126,45 @@ if ! az containerapp show --name "qdrant-app" --resource-group "$RESOURCE_GROUP"
       --ingress internal \
       --target-port 6333
 else
-    echo "Container app 'qdrant-app' already exists."
-fi
-
-# 6. Create the Backend Container App
-if ! az containerapp show --name "backend-app" --resource-group "$RESOURCE_GROUP" --query "id" -o tsv &>/dev/null; then
-    echo "Deploying Backend container..."
-    az containerapp create \
-      --name "backend-app" \
+    echo "Container app 'qdrant-app' already exists. Updating if necessary..."
+    az containerapp update \
+      --name "qdrant-app" \
       --resource-group "$RESOURCE_GROUP" \
       --environment "$CONTAINER_APP_ENV" \
-      --image "$ACR_LOGIN_SERVER/rag_chatbot:latest" \
-      --registry-server "$ACR_LOGIN_SERVER" \
+      --image "qdrant/qdrant:latest" \
       --min-replicas 1 \
       --max-replicas 1 \
+      --volumes "qdrant-storage-link:/qdrant/storage" \
       --ingress internal \
-      --target-port 8000 \
-      --env-vars "QDRANT_URL=http://qdrant-app:6333" "APP_ENV=production"
-else
-    echo "Container app 'backend-app' already exists."
+      --target-port 6333
 fi
 
-# 7. Create the Frontend Container App
-if ! az containerapp show --name "frontend-app" --resource-group "$RESOURCE_GROUP" --query "id" -o tsv &>/dev/null; then
-    echo "Deploying Frontend container..."
-    az containerapp create \
-      --name "frontend-app" \
-      --resource-group "$RESOURCE_GROUP" \
-      --environment "$CONTAINER_APP_ENV" \
-      --image "$ACR_LOGIN_SERVER/frontend:latest" \
-      --registry-server "$ACR_LOGIN_SERVER" \
-      --min-replicas 1 \
-      --max-replicas 1 \
-      --ingress external \
-      --target-port 80
-else
-    echo "Container app 'frontend-app' already exists."
-fi
+# 6. Create/Update the Backend Container App
+echo "Deploying Backend container..."
+az containerapp update \
+  --name "rag-backend" \
+  --resource-group "$RESOURCE_GROUP" \
+  --environment "$CONTAINER_APP_ENV" \
+  --image "$ACR_LOGIN_SERVER/rag_chatbot:latest" \
+  --registry-server "$ACR_LOGIN_SERVER" \
+  --min-replicas 1 \
+  --max-replicas 1 \
+  --ingress internal \
+  --target-port 8000 \
+  --env-vars "QDRANT_URL=http://qdrant-app:6333" "APP_ENV=production"
+
+# 7. Create/Update the Frontend Container App
+echo "Deploying Frontend container..."
+az containerapp update \
+  --name "rag-frontend" \
+  --resource-group "$RESOURCE_GROUP" \
+  --environment "$CONTAINER_APP_ENV" \
+  --image "$ACR_LOGIN_SERVER/frontend:latest" \
+  --registry-server "$ACR_LOGIN_SERVER" \
+  --min-replicas 1 \
+  --max-replicas 1 \
+  --ingress external \
+  --target-port 80
 
 FRONTEND_URL=$(az containerapp show --name "frontend-app" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv)
 
