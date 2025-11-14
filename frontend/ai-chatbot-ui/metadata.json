@@ -1,0 +1,7 @@
+{
+  "name": "AI Chatbot UI",
+  "description": "A sleek and modern user interface for a chatbot, inspired by a Dribbble design. It communicates with a local backend to fetch chat responses.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

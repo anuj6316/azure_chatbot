@@ -1,0 +1,38 @@
+AI/ML INTERVIEW TRANSCRIPT
+Date: 2025-11-05 17:24:31
+============================================================
+
+Q1. INTERVIEWER:
+Hello! Welcome to your AI/ML internship interview. Tell me about yourself and your background in AI and machine learning.
+
+A1. CANDIDATE:
+[Processing...]
+
+------------------------------------------------------------
+
+Q2. INTERVIEWER:
+Alright, welcome! Thanks for coming in today. Let's get started.
+
+To begin, could you tell me what specifically interests you about AI and machine learning, and why you're looking for an internship in this field?
+
+A2. CANDIDATE:
+So, from the beginning, I was really interested how the AI works in today's generation, like as you can see, in today's time, AI is like everywhere. Even in our phones, laptops, in our day-to-day life like, uh like as you can see, there is a ChatGPT cloud. So we are surrounded by the AI and I wanted to learn how really AI works. That was the main question to me behind my learning about the AI. और मैंने इसके बेसिस पर अपना AI interview journey शुरू किया।
+
+------------------------------------------------------------
+
+Q3. INTERVIEWER:
+That's a great passion to have, especially given how AI is integrated everywhere. To start, could you tell me a bit about your technical background and what specific programming languages or tools you're most comfortable using for AI/ML tasks?
+
+A3. CANDIDATE:
+Sorry Alex, can you just end the interview here? I will give you feedback.
+
+------------------------------------------------------------
+
+Q4. INTERVIEWER:
+Understood. Thank you for your time today. We'll be in touch.
+
+A4. CANDIDATE:
+[Processing...]
+
+------------------------------------------------------------
+

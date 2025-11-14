@@ -1,0 +1,40 @@
+AI/ML INTERVIEW TRANSCRIPT
+Date: 2025-11-05 17:52:06
+============================================================
+
+Q1. INTERVIEWER:
+Hello! Welcome to your AI/ML internship interview. Tell me about yourself and your background in AI and machine learning.
+
+A1. CANDIDATE:
+So first of all, thank you for the opportunity given to me. My name is Anuj Kumar, I am from Bihar, and last year I have completed my bachelor's degree in computer science field. And for past couple of years I have tried to learn couple of many skills like in the field of AIML. Like I have learned what is rag model, what are the LLMs present, what are the use cases of that. How to integrate LLM in my project. And I have also learned couple of concepts in machine learning like what are the different types of machine learning I present, what are the models, how to train a model in machine learning, things like that and I have. And based on those skills I have also worked on couple of projects also like Motion AI, generative conversation chatbot, dating price prediction, projects like that. And I think that's all from my side.
+
+------------------------------------------------------------
+
+Q2. INTERVIEWER:
+Great, thank you for that overview. It sounds like you've gained some practical experience with different AI/ML concepts.
+
+You mentioned working on a conversational chatbot. Could you briefly tell me about a key challenge you faced while building it and how you addressed it?
+
+A2. CANDIDATE:
+So as per my conversational chatbot, it was the first project I have worked in the AI field where I have tried to build a a friend, artificial friend for a user, where it will, where its main aim was helping the user with their queries and day-to-day life problems and that was the main idea behind it. And I wanted it to be very natural, natural in nature, so that the user don't think that it is an artificial intelligence. So that was the main idea behind it and I have tried adding voice agent like we have a conversation based on audio, not based on the text. That was the main idea. And I have learned so many things from there also like how to use audios in these conversational chatbot and how to create a particular response based on the user's preferences and things like that.
+
+------------------------------------------------------------
+
+Q3. INTERVIEWER:
+That's a great goal for a chatbot. What was the most challenging aspect of making it sound natural and less like a typical AI?
+
+A3. CANDIDATE:
+Sorry, I don't have time right now. Can you just schedule this into another time? It would be really helpful for me as I am little busy right now. मुझे थोड़ा काम आ गया है, इसमें मुझे मैं अभी इंटरव्यू नहीं दे पाऊंगा। क्या तुम मेरा इंटरव्यू कंप्लीट कर सकती हो? यहीं पर एंड कर सकती हो?
+
+------------------------------------------------------------
+
+Q4. INTERVIEWER:
+Hello! Thanks for joining us today. I'm excited to learn more about your interest in our AI/ML intern position.
+
+Let's dive right in. Could you briefly explain what machine learning is to someone who isn't familiar with it?
+
+A4. CANDIDATE:
+[Processing...]
+
+------------------------------------------------------------
+

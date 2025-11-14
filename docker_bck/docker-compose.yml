@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    container_name: rag-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/chatbot_backend:/app/src/chatbot_backend
+    environment:
+      - MODEL_NAME=DeepSeek-R1-0528
+      - OCR_MODEL_NAME=Llama-4-Maverick-17B-128E-Instruct
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_COLLECTION=rag_collection
+      - EMBEDDING_MODEL=all-MiniLM-L6-v2
+      - RETRIEVER_TOP_K=8
+      - CHUNK_SIZE=800
+      - CHUNK_OVERLAP=150
+      - CORS_ALLOW_ORIGINS=http://localhost:5173
+
+    depends_on:
+      - qdrant
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    container_name: rag-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/ai-chatbot-ui:/app
+      - /app/node_modules
+    environment:
+      - VITE_BACKEND_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: rag-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:

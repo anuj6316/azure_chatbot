@@ -1,0 +1,38 @@
+# --------- Core serving ---------
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+pydantic==2.10.0
+python-dotenv==1.0.1
+
+# --------- LangChain ecosystem ---------
+langchain==0.3.7
+langchain-core==0.3.17          # ← bumped from 0.3.15
+langchain-community==0.3.7
+langchain-text-splitters==0.3.2
+langchain-google-genai==2.0.7
+langchain-openai
+langchain-huggingface==0.1.2
+langchain-qdrant==0.1.4
+# langchain-sambanova==0.1.0      # uncomment if needed
+
+# --------- Vector store & embeddings ---------
+qdrant-client==1.12.1
+sentence-transformers==3.2.1
+
+# --------- Document loaders ---------
+pymupdf==1.24.13
+python-docx==1.1.2
+pdf2image==1.17.0
+pandas==2.2.3
+
+# --------- Image support ---------
+Pillow==11.0.0
+azure-ai-vision-imageanalysis
+python-magic
+
+# --------- Google AI ---------
+google-genai
+
+docx2txt
+dotenv
+langchain-azure-ai

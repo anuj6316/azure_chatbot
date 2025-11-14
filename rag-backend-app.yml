@@ -1,0 +1,27 @@
+type: microsoft.app/containerapps
+name: rag-backend
+location: eastus
+properties:
+  managedEnvironmentId: /subscriptions/72da314e-6a9e-499f-bcfe-4ded4ed0b4e6/resourceGroups/rag-app-rg/providers/Microsoft.App/managedEnvironments/rag-app-env
+
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8000
+
+    secrets:
+      - name: qdrant-url
+        value: "https://<QDRANT_URL>" # replace after qdrant deploy
+
+  template:
+    containers:
+      - name: rag-backend
+        image: ragacranujkumar.azurecr.io/rag_chatbot:latest
+        env:
+          - name: QDRANT_URL
+            secretRef: qdrant-url
+          - name: APP_ENV
+            value: "production"
+        resources:
+          cpu: 1.0
+          memory: 2Gi
