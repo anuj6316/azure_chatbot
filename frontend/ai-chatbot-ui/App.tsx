@@ -3,7 +3,7 @@ import { Sidebar } from "./components/Sidebar";
 import { ChatWindow } from "./components/ChatWindow";
 import type { Message } from "./types";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:8000";
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);

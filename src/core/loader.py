@@ -20,14 +20,10 @@ from langchain_core.documents import Document
 from dotenv import load_dotenv
 import base64
 
-config = get_config()
 load_dotenv()
-
 
 HANDWRITTEN_FOLDER = "handwritten_notes"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
-IMAGE_OUTPUT_DIR = config.image_output_dir
-IMAGE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_img_content(img_path: str) -> str:
@@ -105,6 +101,10 @@ def _create_handwritten_document(
 
 
 def _load_handwritten_notes(base_dir: Path) -> List[Document]:
+    config = get_config()
+    image_output_dir = config.image_output_dir
+    image_output_dir.mkdir(parents=True, exist_ok=True)
+    
     handwritten_root = base_dir / HANDWRITTEN_FOLDER
     if not handwritten_root.exists() or not handwritten_root.is_dir():
         return []
@@ -143,7 +143,7 @@ def _load_handwritten_notes(base_dir: Path) -> List[Document]:
         for pdf_name in pdf_files:
             pdf_path = current_path / pdf_name
             temp_dir = Path(
-                tempfile.mkdtemp(prefix="pdf_images_", dir=IMAGE_OUTPUT_DIR)
+                tempfile.mkdtemp(prefix="pdf_images_", dir=image_output_dir)
             )
             try:
                 image_paths = convert_pdf_to_images(str(pdf_path), temp_dir)
@@ -170,8 +170,16 @@ def _load_handwritten_notes(base_dir: Path) -> List[Document]:
 
 
 def load_docs(
-    base_dir: str = config.kb_path,
+    base_dir: str = None,
 ) -> List[Document]:
+    """Load documents from knowledge base directory.
+    
+    Args:
+        base_dir: Path to knowledge base directory (defaults to config.kb_path)
+    """
+    if base_dir is None:
+        base_dir = get_config().kb_path
+    
     base_path = Path(base_dir)
     docs: List[Document] = []
 
@@ -232,5 +240,5 @@ def load_docs(
 
 
 if __name__ == "__main__":
-    text = get_img_content("/home/anujkumar/Downloads/rag_with_langchain/frontend/ai-chatbot-ui/WhatsApp Image 2025-11-11 at 11.19.24 AM.jpeg")
+    text = get_img_content("/home/anuj/azure_chatbot/data/knowledge_base/handwritten_notes/langgraph_langchain/WhatsApp Image 2025-11-11 at 11.19.24 AM (1).jpeg")
     print(f"Loaded text\n\n{text}\n\n documents.")

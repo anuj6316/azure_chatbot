@@ -5,9 +5,10 @@ from pydantic import BaseModel
 from ..core import chat_manager, retriver
 from ..core.config import get_config, get_vectorstore
 
-config = get_config()
 app = FastAPI()
 
+# Configure CORS with settings from config
+config = get_config()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.cors_allow_origins,
@@ -24,11 +25,6 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
-
-
-@app.get("/")
-async def health():
-    return {"status": "healthy", "service": "rag-chatbot"}
 
 
 @app.post("/chat_response")

@@ -37,4 +37,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /data/vector_store
+/data/knowledge_base/**/*.pdf
+/data/knowledge_base/**/*.docx
+/data/knowledge_base/**/*.jpeg
+/data/knowledge_base/**/*.jpg
+/data/knowledge_base/**/*.png
+/data/knowledge_base/**/*.txt
 /output
+*.md
+!readme.md

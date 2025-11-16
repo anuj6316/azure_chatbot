@@ -16,7 +16,6 @@ from .prompt import prompt_template
 from .retriver import get_relevant_docs
 
 load_dotenv()
-config = get_config()
 
 # ---------------------
 #  Pydantic Output Model
@@ -74,8 +73,15 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 # ---------------------
 
 
-def get_llm(model_name=config.model_name):
-    return ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+def get_llm(model_name=None):
+    """Get LLM instance.
+    
+    Args:
+        model_name: Name of the model to use (defaults to config.model_name)
+    """
+    if model_name is None:
+        model_name = get_config().model_name
+    return ChatGoogleGenerativeAI(model=model_name)
 
 
 # ---------------------

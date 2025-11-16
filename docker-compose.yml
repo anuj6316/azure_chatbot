@@ -3,33 +3,53 @@ version: '3.8'
 services:
   qdrant:
     image: qdrant/qdrant:latest
+    container_name: qdrant_db
     ports:
       - "6333:6333"
       - "6334:6334"
     volumes:
+      # Persistent storage for Qdrant data
       - qdrant_storage:/qdrant/storage
+      # Optional: custom Qdrant config
+      - ./qdrant_config.yaml:/qdrant/config/production.yaml:ro
+    environment:
+      # Performance optimizations
+      QDRANT_TELEMETRY_DISABLED: "true"
     networks:
       - rag_network
+    
+    restart: unless-stopped
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: rag_chatbot_app
     ports:
       - "3000:80"
       - "8000:8000"
     env_file:
       - .env
     volumes:
+      # Persistent storage for knowledge base
       - ./data/knowledge_base:/app/data/knowledge_base
+      # Persistent storage for vector store (backup)
+      - ./data/vector_store:/app/data/vector_store
+      # Persistent storage for output
+      - ./output:/app/output
     depends_on:
       - qdrant
     networks:
       - rag_network
+    restart: unless-stopped
+    # Performance optimization: increase shared memory for faster operations
+    shm_size: 2gb
 
 networks:
   rag_network:
     driver: bridge
 
 volumes:
+  # Named volume for Qdrant persistent storage
   qdrant_storage:
+    driver: local
