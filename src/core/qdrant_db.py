@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Any, Dict, Tuple
-from .config import get_config
 
+from .config import get_config
+from .embeddings import create_qdrant_vectorstore
 from .loader import load_docs
 from .splitter import split_documents
-from .embeddings import create_qdrant_vectorstore
 
 # Allow overriding KB path via env; fallback to project knowledge_base
 config = get_config()
@@ -46,6 +46,5 @@ def ingest_knowledge_base(
     return vectorstore, summary
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     ingest_knowledge_base()

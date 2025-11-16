@@ -26,6 +26,11 @@ class ChatResponse(BaseModel):
     answer: str
 
 
+@app.get("/")
+async def health():
+    return {"status": "healthy", "service": "rag-chatbot"}
+
+
 @app.post("/chat_response")
 async def rag_chat(body: ChatRequest):
     try:

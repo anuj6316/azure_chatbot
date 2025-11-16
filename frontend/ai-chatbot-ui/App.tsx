@@ -2,17 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatWindow } from "./components/ChatWindow";
 import type { Message } from "./types";
+
 const API_URL = "/api";
+
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  // ✅ Restore sessionId state (but keep the bugfix - no reset on refresh)
   const [sessionId, setSessionId] = useState<string>(() => {
-    let storedSessionId = sessionStorage.getItem('chat_session_id');
+    let storedSessionId = sessionStorage.getItem("chat_session_id");
     if (!storedSessionId) {
       storedSessionId = crypto.randomUUID();
-      sessionStorage.setItem('chat_session_id', storedSessionId);
+      sessionStorage.setItem("chat_session_id", storedSessionId);
     }
     return storedSessionId;
   });
@@ -24,11 +28,6 @@ const App: React.FC = () => {
       document.documentElement.classList.remove("dark");
     }
   }, [theme]);
-
-  // Generate session_id on component mount (page refresh)
-  useEffect(() => {
-    setSessionId(crypto.randomUUID());
-  }, []);
 
   const handleSendMessage = async (userInput: string) => {
     if (!userInput.trim()) return;
@@ -47,6 +46,7 @@ const App: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        // ✅ Fixed: Added sessionId value here
         body: JSON.stringify({ query: userInput, session_id: sessionId }),
       });
 
@@ -77,6 +77,10 @@ const App: React.FC = () => {
 
   const handleNewChat = () => {
     setMessages([]);
+    // ✅ Optional: Generate new session for new chat
+    const newSessionId = crypto.randomUUID();
+    setSessionId(newSessionId);
+    sessionStorage.setItem("chat_session_id", newSessionId);
   };
 
   const toggleTheme = () => {

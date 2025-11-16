@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 # Optional imports for vectorstore; okay if unresolved in some environments
 try:
-    from langchain_qdrant import Qdrant
     from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_qdrant import Qdrant
     from qdrant_client import QdrantClient
 except Exception:  # pragma: no cover
     Qdrant = None  # type: ignore
@@ -42,9 +42,11 @@ class Config:
             "QDRANT_CHAT_HISTORY_COLLECTION", "chatbot_chat_history"
         )
         # If QDRANT_URL is provided, prefer it; otherwise build from host/port
-        self.qdrant_url = os.getenv(
-            "QDRANT_URL", f"http://{self.qdrant_host}:{self.qdrant_port}"
-        )
+        self.qdrant_url = os.getenv("QDRANT_URL")
+        if not self.qdrant_url:
+            self.qdrant_url = (
+                "https://qdrant-app.politewave-6298a03c.eastus.azurecontainerapps.io"
+            )
 
         # Embeddings
         self.embedding_model = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
@@ -158,7 +160,13 @@ class Config:
             raise RuntimeError(
                 "Vectorstore dependencies are not available. Please install langchain_community, langchain_huggingface, qdrant-client."
             )
-        client = QdrantClient(url=self.qdrant_url)
+        # In get_vectorstore(), add timeout parameter
+        client = QdrantClient(
+            url="localhost:6333",
+            api_key=None,
+            timeout=60,
+            # prefer_grpc=False,  # Add this
+        )
         embeddings = HuggingFaceEmbeddings(model_name=self.embedding_model)
         self._vectorstore = Qdrant(
             client=client,

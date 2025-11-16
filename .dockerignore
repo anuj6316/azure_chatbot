@@ -1,119 +1,40 @@
-# =========================
-# General ignores
-# =========================
 .git
 .gitignore
-.DS_Store
-.vscode
-.idea
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.db
-*.sqlite3
-*.log
-
-# =========================
-# Python-specific ignores
-# =========================
-# Virtual environments
-venv/
-.env/
-*.egg-info/
-dist/
-build/
-.eggs/
-pip-wheel-metadata/
-
-# =========================
-# Node / React ignores
-# =========================
-# Dependency folders
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-lock.yaml
-package-lock.json
-
-# Build outputs (handled in Docker)
-ai-chatbot-ui/dist/
-ai-chatbot-ui/.vite/
-ai-chatbot-ui/.turbo/
-ai-chatbot-ui/.next/
-
-# Local dev environment files
-ai-chatbot-ui/.env
-ai-chatbot-ui/.env.local
-ai-chatbot-ui/.env.development
-ai-chatbot-ui/.env.production
-
-# =========================
-# Backend-specific ignores
-# =========================
-chatbot_backend/.env
-chatbot_backend/.env.*
-chatbot_backend/__pycache__/
-chatbot_backend/logs/
-chatbot_backend/.pytest_cache/
-chatbot_backend/tests/
-
-# =========================
-# System / OS files
-# =========================
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-.envrc
-*.swp
-*.bak
-*.tmp
-*.temp
-
-# =========================
-# Docker / Compose metadata
-# =========================
+.dockerignore
 Dockerfile
+Dockerfile.backend
+Dockerfile.frontend
 docker-compose.yml
-
-# =========================
-# Qdrant and runtime data
-# =========================
-qdrant_storage/
-*.qdrant/
-data/
-tmp/
-
-# Ignore all hidden files and directories
-.*
-!.env.local
-
-# Ignore IDE files
-.vscode/
-.idea/
-
-# Ignore Python cache and bytecode
-__pycache__/
+docker_bck
+venv
+.venv
+__pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
-*.so
-
-# Ignore node_modules
-node_modules/
-
-# Ignore logs
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.idea
+.vscode
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
 *.log
-
-# Ignore OS generated files
-.DS_Store
-Thumbs.db
-
-# Ignore build artifacts
-dist/
-build/
-
-# Ignore knowledge base files that aren't needed in container
-knowledge_base/
+node_modules
+frontend/ai-chatbot-ui/node_modules
+build
+dist
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/data/vector_store
+/output

@@ -26,3 +26,16 @@
 ## Functionality to add
 [x] Session History for conversational chat
 [] Ability to process mermaid code in frontend.
+
+
+## Azure build
+```
+# In frontend/ai-chatbot-ui directory
+cd ~/Downloads/rag_with_langchain/frontend/ai-chatbot-ui
+
+# Build v6
+docker build -t rag-frontend:latest .
+docker tag rag-frontend:latest ragacranujkumar.azurecr.io/rag-frontend:v6
+az acr login --name ragacranujkumar
+docker push ragacranujkumar.azurecr.io/rag-frontend:v6
+```
