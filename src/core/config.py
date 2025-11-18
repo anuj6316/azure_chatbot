@@ -9,11 +9,11 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 
 # Optional imports for vectorstore; okay if unresolved in some environments
-try:
-    from .embeddings import get_existing_vectorstore
-except ImportError:  # pragma: no cover
-    # This allows the config to be imported in environments where langchain/qdrant aren't installed
-    get_existing_vectorstore = None
+# try:
+#     from .embeddings import get_existing_vectorstore
+# except ImportError:  # pragma: no cover
+#     # This allows the config to be imported in environments where langchain/qdrant aren't installed
+#     get_existing_vectorstore = None
 
 # Load environment variables from a .env if present
 load_dotenv()
@@ -38,7 +38,7 @@ class Config:
         self.qdrant_port = int(os.getenv("QDRANT_PORT", "6333"))
         self.qdrant_collection = os.getenv("QDRANT_COLLECTION", "rag_collection")
         self.qdrant_chat_history_collection = os.getenv("QDRANT_CHAT_HISTORY_COLLECTION", "chatbot_chat_history")
-        self.qdrant_url = f"http://{self.qdrant_host}:{self.qdrant_port}"
+        self.qdrant_url = os.getenv('QDRANT_URL')
 
         # SambaNova embeddings configuration
         self.sambanova_api_key = os.getenv("SAMBANOVA_API_KEY", "")
@@ -207,11 +207,12 @@ class Config:
         """
         if self._vectorstore is not None:
             return self._vectorstore
-        if get_existing_vectorstore is None:
-            raise RuntimeError(
-                "Vectorstore dependencies are not available. Please install langchain_qdrant, langchain-openai, and qdrant-client."
-            )
-        
+        # if get_existing_vectorstore is None:
+        #     raise RuntimeError(
+        #         "Vectorstore dependencies are not available. Please install langchain_qdrant, langchain-openai, and qdrant-client."
+        #     )
+        # Import locally to avoid circular import
+        from .embeddings import get_existing_vectorstore
         # Delegate to the correct function
         self._vectorstore = get_existing_vectorstore(
             collection_name=self.qdrant_collection,

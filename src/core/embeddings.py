@@ -165,7 +165,7 @@ def get_existing_vectorstore(
     )
     
     # Create Qdrant client
-    client = QdrantClient(url=qdrant_url, api_key=None, timeout=60)
+    client = QdrantClient(url=os.getenv('QDRANT_URL'), api_key=os.getenv('QDRANT_API_KEY'), timeout=60)
     
     # Return existing vectorstore
     vectorstore = QdrantVectorStore(
