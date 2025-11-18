@@ -36,36 +36,20 @@ parser = PydanticOutputParser(pydantic_object=QueryResponse)
 #  Chat History (Updated)
 # ---------------------
 
-from collections import defaultdict
-from typing import List
-
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
-
-
-class InMemoryChatMessageHistory(BaseChatMessageHistory):
-    """In-memory implementation of chat message history."""
-
-    def __init__(self, session_id: str):
-        self.session_id = session_id
-        self.messages_by_session = defaultdict(list)
-
-    @property
-    def messages(self) -> List[BaseMessage]:
-        """Retrieve the messages for the current session."""
-        return self.messages_by_session[self.session_id]
-
-    def add_message(self, message: BaseMessage) -> None:
-        """Add a message to the session history."""
-        self.messages_by_session[self.session_id].append(message)
-
-    def clear(self) -> None:
-        """Clear session history."""
-        self.messages_by_session[self.session_id].clear()
-
+from langchain_community.chat_message_histories import SQLChatMessageHistory
 
 def get_session_history(session_id: str) -> BaseChatMessageHistory:
-    return InMemoryChatMessageHistory(session_id)
+    """
+    Get chat history from SQLite database.
+    """
+    # Ensure the directory exists
+    db_path = "sqlite:///data/chat_history/chat_history.db"
+    os.makedirs("data/chat_history", exist_ok=True)
+    
+    return SQLChatMessageHistory(
+        session_id=session_id,
+        connection_string=db_path
+    )
 
 
 # ---------------------
@@ -126,6 +110,12 @@ def generate_response(llm, context, query, session_id: str):
     history.add_ai_message(response.answer)
 
     return response.dict()
+
+
+def get_chat_history_messages(session_id: str):
+    """Retrieve raw messages for a session."""
+    history = get_session_history(session_id)
+    return history.messages
 
 
 # ---------------------

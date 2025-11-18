@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatWindow } from "./components/ChatWindow";
-import type { Message } from "./types";
+import type { Message, ChatSession } from "./types";
 
 const API_URL = "http://localhost:8000";
 
@@ -11,15 +11,65 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
-  // ✅ Restore sessionId state (but keep the bugfix - no reset on refresh)
-  const [sessionId, setSessionId] = useState<string>(() => {
-    let storedSessionId = sessionStorage.getItem("chat_session_id");
-    if (!storedSessionId) {
-      storedSessionId = crypto.randomUUID();
-      sessionStorage.setItem("chat_session_id", storedSessionId);
-    }
-    return storedSessionId;
+  // Session Management
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
+    const stored = localStorage.getItem("chat_sessions");
+    return stored ? JSON.parse(stored) : [];
   });
+
+  const [sessionId, setSessionId] = useState<string>(() => {
+    const stored = localStorage.getItem("current_session_id");
+    if (stored) return stored;
+    // If no session, create one immediately
+    const newId = crypto.randomUUID();
+    return newId;
+  });
+
+  // Persist sessions and current ID
+  useEffect(() => {
+    localStorage.setItem("chat_sessions", JSON.stringify(sessions));
+  }, [sessions]);
+
+  useEffect(() => {
+    localStorage.setItem("current_session_id", sessionId);
+  }, [sessionId]);
+
+  // Ensure at least one session exists on load
+  useEffect(() => {
+    if (sessions.length === 0) {
+      const initialSession: ChatSession = {
+        id: sessionId,
+        title: "New Chat",
+        date: new Date().toISOString(),
+      };
+      setSessions([initialSession]);
+    }
+  }, []); // Run once
+
+  // Fetch history when switching sessions
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!sessionId) return;
+      setIsLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/chat_history/${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setMessages(data.messages || []);
+        } else {
+          setMessages([]);
+        }
+      } catch (e) {
+        console.error("Failed to load history", e);
+        setMessages([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [sessionId]);
+
 
   useEffect(() => {
     if (theme === "dark") {
@@ -40,13 +90,20 @@ const App: React.FC = () => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setIsLoading(true);
 
+    // Update session title if it's the first message and title is "New Chat"
+    setSessions(prev => prev.map(s => {
+      if (s.id === sessionId && s.title === "New Chat") {
+        return { ...s, title: userInput.slice(0, 30) + (userInput.length > 30 ? "..." : "") };
+      }
+      return s;
+    }));
+
     try {
       const response = await fetch(`${API_URL}/chat_response`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        // ✅ Fixed: Added sessionId value here
         body: JSON.stringify({ query: userInput, session_id: sessionId }),
       });
 
@@ -76,11 +133,29 @@ const App: React.FC = () => {
   };
 
   const handleNewChat = () => {
+    const newId = crypto.randomUUID();
+    const newSession: ChatSession = {
+      id: newId,
+      title: "New Chat",
+      date: new Date().toISOString(),
+    };
+    setSessions(prev => [newSession, ...prev]);
+    setSessionId(newId);
     setMessages([]);
-    // ✅ Optional: Generate new session for new chat
-    const newSessionId = crypto.randomUUID();
-    setSessionId(newSessionId);
-    sessionStorage.setItem("chat_session_id", newSessionId);
+  };
+
+  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newSessions = sessions.filter(s => s.id !== id);
+    setSessions(newSessions);
+    if (id === sessionId) {
+      if (newSessions.length > 0) {
+        setSessionId(newSessions[0].id);
+      } else {
+        // If deleted last session, create a new one
+        handleNewChat();
+      }
+    }
   };
 
   const toggleTheme = () => {
@@ -95,6 +170,10 @@ const App: React.FC = () => {
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         theme={theme}
         onToggleTheme={toggleTheme}
+        sessions={sessions}
+        currentSessionId={sessionId}
+        onSelectSession={setSessionId}
+        onDeleteSession={handleDeleteSession}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <ChatWindow

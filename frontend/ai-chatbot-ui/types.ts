@@ -4,3 +4,9 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot' | 'error';
 }
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  date: string;
+}
