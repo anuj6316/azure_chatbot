@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "axios": "^1.13.2",
-    "mermaid": "^11.12.1",
+    "d3-graphviz": "^5.6.0",
+    "d3-selection": "^3.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^9.0.1",

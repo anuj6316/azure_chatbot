@@ -37,6 +37,8 @@ services:
       - ./data/vector_store:/app/data/vector_store
       # Persistent storage for output
       - ./output:/app/output
+      # Persistent storage for chat history
+      - ./data/chat_history:/app/data/chat_history
     depends_on:
       - qdrant
     networks:
