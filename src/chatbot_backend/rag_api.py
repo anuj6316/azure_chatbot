@@ -17,10 +17,16 @@ app.add_middleware(
     allow_methods=config.cors_allow_methods,
     allow_headers=config.cors_allow_headers,
 )
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
-@app.get("/")
-async def read_root():
-    return {"message": "FastAPI is running!"}
+
+# serve frontend build (dist folder renamed to frontend_dist)
+# app.mount("/", StaticFiles(directory="frontend_dist", html=True), name="frontend")
+
+# API PREFIX
+# api_router = APIRouter(prefix="/api")
 
 
 
@@ -32,6 +38,12 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
 
+
+# router = APIRouter(prefix="/api")
+
+# @router.get("/")
+# async def root():
+#     return {"message": "API running"}
 
 @app.post("/chat_response")
 async def rag_chat(body: ChatRequest):

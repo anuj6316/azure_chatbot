@@ -3,7 +3,7 @@ import { Sidebar } from "./components/Sidebar";
 import { ChatWindow } from "./components/ChatWindow";
 import type { Message, ChatSession } from "./types";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:8000";
 console.log("API_URL:", API_URL);
 
 const App: React.FC = () => {
