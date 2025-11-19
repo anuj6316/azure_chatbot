@@ -18,6 +18,11 @@ app.add_middleware(
     allow_headers=config.cors_allow_headers,
 )
 
+@app.get("/")
+async def read_root():
+    return {"message": "FastAPI is running!"}
+
+
 
 class ChatRequest(BaseModel):
     query: str
