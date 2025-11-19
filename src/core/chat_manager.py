@@ -27,6 +27,7 @@ class QueryResponse(BaseModel):
         "greeting", "document_query", "general_info", "goodbye", "chitchat"
     ] = Field(description="The classified category of the user's query")
     answer: str = Field(description="Response text")
+    diagram: str = Field(description="Graphviz DOT code ONLY. Do not include this in the answer field. If no diagram is needed, use an empty string.", default=None)
     context_used: bool = Field(description="Whether RAG context was used")
 
 

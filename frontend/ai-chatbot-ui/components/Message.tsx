@@ -3,6 +3,7 @@ import type { Message as MessageType } from "../types";
 import { BotIcon, UserIcon } from "./icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { GraphvizDiagram } from "./GraphvizDiagram";
 
 interface MessageProps {
   message: MessageType;
@@ -52,11 +53,10 @@ const Message: React.FC<MessageProps> = ({ message, isLoading = false }) => {
       )}
 
       <div
-        className={`max-w-md lg:max-w-2xl px-4 py-3 rounded-2xl ${
-          isUser
-            ? "bg-blue-600 text-white rounded-br-none"
-            : "bg-gray-100 dark:bg-[#2c2e42] text-gray-800 dark:text-gray-200 rounded-bl-none"
-        }`}
+        className={`max-w-md lg:max-w-2xl px-4 py-3 rounded-2xl ${isUser
+          ? "bg-blue-600 text-white rounded-br-none"
+          : "bg-gray-100 dark:bg-[#2c2e42] text-gray-800 dark:text-gray-200 rounded-bl-none"
+          }`}
       >
         {isLoading ? (
           <PulsingLoader />
@@ -72,6 +72,9 @@ const Message: React.FC<MessageProps> = ({ message, isLoading = false }) => {
           >
             {message.text}
           </ReactMarkdown>
+        )}
+        {message.diagram && !isLoading && (
+          <GraphvizDiagram code={message.diagram} />
         )}
       </div>
 

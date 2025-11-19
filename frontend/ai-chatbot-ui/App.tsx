@@ -117,6 +117,7 @@ const App: React.FC = () => {
         id: (Date.now() + 1).toString(),
         text: data.answer || "Sorry, I couldn't get a response.",
         sender: "bot",
+        diagram: data.diagram,
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
