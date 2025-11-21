@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Literal, Union
+from typing import Literal, Union, Optional
 from uuid import uuid4
 
 from dotenv import load_dotenv
@@ -14,7 +14,9 @@ from pydantic import BaseModel, Field
 from .config import get_config, get_vectorstore
 from .prompt import prompt_template
 from .retriver import get_relevant_docs
-
+from .query_decomposition import process_query_decomposition
+from .filter_context import process_query_retriever, rerank_context
+from .utills import format_docs
 load_dotenv()
 
 # ---------------------
@@ -27,11 +29,11 @@ class QueryResponse(BaseModel):
         "greeting", "document_query", "general_info", "goodbye", "chitchat"
     ] = Field(description="The classified category of the user's query")
     answer: str = Field(description="Response text")
-    diagram: str = Field(description="Graphviz DOT code ONLY. Do not include this in the answer field. If no diagram is needed, use an empty string.", default=None)
+    diagram: Optional[str] = Field(description="Graphviz DOT code ONLY. Do not include this in the answer field. If no diagram is needed, use an empty string.", default=None)
     context_used: bool = Field(description="Whether RAG context was used")
 
 
-parser = PydanticOutputParser(pydantic_object=QueryResponse)
+parser = PydanticOutputParser(pydantic_object=QueryResponse)    
 
 # ---------------------
 #  Chat History (Updated)
@@ -75,8 +77,35 @@ def get_llm(model_name=None):
 
 
 def generate_response(llm, context, query, session_id: str):
+    # step: 01 generating sub-queries
+    sub_query = process_query_decomposition(query)
+
+    # retriving the docs based on the sub-query
+    sub_query_docs = process_query_retriever(sub_query)
     context_text = "\n".join([doc.page_content for doc in context])
 
+
+    # combining everything
+    all_context = []
+    for i in sub_query_docs:
+        all_context.extend(format_docs(i['context'])) 
+
+    reranked_response = rerank_context(query, [c["text"] for c in all_context])
+
+    # 5. Attach metadata to reranked text
+    reranked_chunks = []
+    if isinstance(reranked_response, dict) and 'results' in reranked_response:
+        for result in reranked_response['results']:
+            index = result['index']
+            if 0 <= index < len(all_context):
+                reranked_chunks.append(all_context[index])
+    else:
+        # Fallback if something goes wrong
+        reranked_chunks = all_context[:5]
+
+    # 6. Create final context
+    final_context = "\n\n".join(r["text"] for r in reranked_chunks)
+    
     # Build prompt from string template
     chat_prompt_template = ChatPromptTemplate.from_template(prompt_template)
 
@@ -100,7 +129,7 @@ def generate_response(llm, context, query, session_id: str):
     # Run LLM
     response: QueryResponse = chain.invoke(
         {
-            "context_text": context_text,
+            "context_text": final_context,
             "query": query,
             "chat_history": chat_history_str,
         }
@@ -124,7 +153,7 @@ def get_chat_history_messages(session_id: str):
 # ---------------------
 
 if __name__ == "__main__":
-    query = "what is the use of apple"
+    query = "what is langgraph?"
 
     llm = get_llm()
     vectorstore = get_vectorstore()

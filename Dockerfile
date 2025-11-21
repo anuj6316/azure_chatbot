@@ -1,60 +1,45 @@
-# ==========================================
-# Stage 1: Build React frontend
-# ==========================================
-FROM node:18-alpine AS frontend-builder
-
-# Set working directory for the frontend build
+# Stage 1: Build React Frontend
+FROM node:20-alpine as frontend-build
 WORKDIR /app/frontend
 
-# Copy package.json files first to leverage Docker cache for dependencies
-# NOTE: Ensure 'frontend/ai-chatbot-ui/' matches your actual folder structure
-COPY frontend/ai-chatbot-ui/package*.json ./ 
+# Copy frontend package files
+COPY frontend/ai-chatbot-ui/package*.json ./
+RUN npm config set fetch-retry-maxtimeout 600000 \
+    && npm config set fetch-retry-mintimeout 10000 \
+    && npm config set registry https://registry.npmjs.org/
+RUN npm install
 
-# Install dependencies (clean install)
-RUN npm ci --prefer-offline --no-audit 
+# Copy frontend source code
+COPY frontend/ai-chatbot-ui/ .
 
-# Copy the rest of the frontend source code
-COPY frontend/ai-chatbot-ui/ ./ 
+# Build with empty API URL so requests are relative (same domain)
+ENV VITE_API_URL=""
+RUN npm run build
 
-# Build the React application
-# This typically creates a 'dist' or 'build' folder
-RUN npm run build 
-
-# ==========================================
-# Stage 2: Final Python image
-# ==========================================
-FROM python:3.11-slim
+# Stage 2: Python Backend + Serving Frontend
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies (Curl is required for the healthcheck)
+# Install system dependencies (if any needed for python packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/* 
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy Python requirements
-COPY requirements.txt . 
+# Copy backend requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt 
+# Copy backend source code
+COPY src/ ./src/
+# COPY data/ ./data/
 
-# Copy the backend application code
-COPY src/ ./src/ 
+# Copy built frontend from Stage 1 to 'static' folder
+# The backend code expects 'static/index.html' and 'static/assets'
+COPY --from=frontend-build /app/frontend/dist ./static
 
-# Copy the built frontend assets from the builder stage
-# We copy them into './static' so FastAPI can serve them
-COPY --from=frontend-builder /app/frontend/dist ./static 
+# Expose port 8000 (FastAPI default)
+EXPOSE 8000
 
-# Create directory for local SQLite storage (if used)
-RUN mkdir -p /app/data/chat_history 
-
-# Expose the port the app runs on
-EXPOSE 8000 
-
-# Health check to ensure the API is responsive
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/docs || exit 1 
-
-# Start the application
-CMD ["uvicorn", "src.chatbot_backend.rag_api:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Run the application
+CMD ["uvicorn", "src.chatbot_backend.rag_api:app", "--host", "0.0.0.0", "--port", "8000"]

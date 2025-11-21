@@ -22,8 +22,13 @@ from fastapi.responses import FileResponse
 import os
 
 
-# serve frontend build (dist folder renamed to frontend_dist)
-# app.mount("/", StaticFiles(directory="frontend_dist", html=True), name="frontend")
+# Serve frontend build
+# Mount the assets folder specifically to let StaticFiles handle caching/headers for assets
+if os.path.exists("static/assets"):
+    app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+
+# Catch-all route moved to the end of the file to avoid blocking API routes
+
 
 # API PREFIX
 # api_router = APIRouter(prefix="/api")
@@ -60,6 +65,8 @@ async def rag_chat(body: ChatRequest):
         )
         return result
     except Exception as exc:
+        import logging
+        logging.error(f"Error generating response: {exc}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"Failed to generate response: {exc}"
         )
@@ -83,6 +90,32 @@ async def get_history(session_id: str):
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch history: {exc}"
         )
+
+
+
+
+# Serve the root index.html specifically
+@app.get("/")
+async def serve_root():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return {"message": "Frontend index.html not found."}
+
+# Catch-all route to serve index.html for client-side routing (SPA)
+# This must be defined AFTER all specific API routes
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    # If the file exists in static (e.g., favicon.ico, manifest.json), serve it
+    static_file_path = os.path.join("static", full_path)
+    if os.path.exists(static_file_path) and os.path.isfile(static_file_path):
+        return FileResponse(static_file_path)
+    
+    # Otherwise, serve index.html for any other route (SPA fallback)
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    
+    # Fallback if static files are missing (e.g., during local backend-only dev)
+    return {"message": "Frontend not found. Ensure the Docker image is built correctly or 'static' directory exists."}
 
 
 if __name__ == "__main__":
